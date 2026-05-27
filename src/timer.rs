@@ -27,7 +27,12 @@ pub fn RegisterSignalHandler(state: Arc<Mutex<GameState>>) {
     let _ = STATE.set(state);
     // println!("::::TASK 3-A:::: Registering SIGALRM handler...");
     // Hint: unsafe {}
-    todo!("TODO 3-A: register SigalrmHandler for SIGALRM, store state Arc in STATE")
+    unsafe {
+        libc::signal(libc::SIGALRM, SigalrmHandler as libc::sighandler_t);
+    }
+
+
+    //todo!("TODO 3-A: register SigalrmHandler for SIGALRM, store state Arc in STATE")
 }
 
 // ----------------------------------------------------------
@@ -38,11 +43,22 @@ pub fn RegisterSignalHandler(state: Arc<Mutex<GameState>>) {
 // Read about how to set a value of an AtomicBool in Rust to set TIMED_OUT to false.
 // ----------------------------------------------------------
 extern "C" fn SigalrmHandler(_sig: libc::c_int) {
-    // Hint: if TIMED_OUT.load(Ordering::SeqCst) {}
+    if TIMED_OUT.load(Ordering::SeqCst) {
+        return;
+    }
     let Some(arc) = STATE.get() else { return; };
     let Ok(mut game) = arc.try_lock() else { return; };
 
-    todo!("TODO 3-B: SIGALRM handler — decrement timer, set round_over")
+    if game.secs_remaining > 0 {
+        game.secs_remaining -= 1;
+    }
+
+    if game.secs_remaining == 0 {
+        TIMED_OUT.store(true, Ordering::SeqCst);
+        game.round_over = true;
+    }
+
+    //todo!("TODO 3-B: SIGALRM handler — decrement timer, set round_over")
 }
 
 // ----------------------------------------------------------

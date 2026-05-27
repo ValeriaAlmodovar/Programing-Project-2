@@ -45,7 +45,18 @@ impl GameState {
     // ----------------------------------------------------------
     pub fn NewRound(&mut self, word: String, timeout_secs: u64, category: String, level: usize, round: usize) {
         self.secret = word.to_lowercase();
-        todo!("TODO 2-A: reset per-round state");
+         //todo!("TODO 2-A: reset per-round state");
+        self.guessed.clear();
+        self.lives = 6;
+        self.secs_remaining = timeout_secs;
+        self.round_over = false;
+        self.won = false;
+        self.last_round_score = 0;
+        self.category = category;
+        self.level = level;
+        self.round = round;
+
+
     }
 
     // ----------------------------------------------------------
@@ -54,11 +65,30 @@ impl GameState {
     //   Hint: use `AllLettersFound()` to check for win
     // ----------------------------------------------------------
     pub fn Guess(&mut self, letter: char) {
-        // Hint: if self.guessed.contains(&letter) {
-        //     return;
-        // }
+        if self.guessed.contains(&letter) {
+             return;
+         }
         
-        todo!("TODO 2-B: handle a player guess");
+        //todo!("TODO 2-B: handle a player guess");
+        self.guessed.push(letter);
+
+        if !self.secret.contains(letter) {
+            if self.lives > 0 {
+                self.lives -= 1;
+            }
+        }
+
+        if self.AllLettersFound() {
+
+            self.won = true;
+            self.round_over = true;
+
+        } else if self.lives == 0 {
+
+            self.won = false;
+            self.round_over = true;
+
+        }
     }
 
     // ----------------------------------------------------------
@@ -67,7 +97,9 @@ impl GameState {
     //   in `guessed`.
     // ----------------------------------------------------------
     pub fn AllLettersFound(&self) -> bool {
-        todo!("TODO 3-B: Returns true when every letter in `secret` appear");
+        //todo!("TODO 3-B: Returns true when every letter in `secret` appear");
+
+        self.secret.chars().all(|c| self.guessed.contains(&c))
     }
 
 
