@@ -30,8 +30,6 @@ pub fn RegisterSignalHandler(state: Arc<Mutex<GameState>>) {
     unsafe {
         libc::signal(libc::SIGALRM, SigalrmHandler as libc::sighandler_t);
     }
-
-
     //todo!("TODO 3-A: register SigalrmHandler for SIGALRM, store state Arc in STATE")
 }
 
@@ -66,7 +64,13 @@ extern "C" fn SigalrmHandler(_sig: libc::c_int) {
 //   Returns the number of seconds allowed per word at each level:
 // ----------------------------------------------------------
 pub fn TimeOutForLevel(level: usize) -> u64 {
-    todo!("TODO 4-A: return seconds per level")
+    //todo!("TODO 4-A: return seconds per level")
+    match level {
+        1 => 300,
+        2 => 180,
+        3 => 120,
+        _ => 300,
+    }
 }
 
 // ----------------------------------------------------------
@@ -76,7 +80,23 @@ pub fn TimeOutForLevel(level: usize) -> u64 {
 // ----------------------------------------------------------
 pub fn Start(_timeout_secs: u64) {
     TIMED_OUT.store(false, Ordering::SeqCst);
-    todo!("TODO 3-D: arm periodic SIGALRM via libc::setitimer(ITIMER_REAL, 1s/1s)")
+
+    let timer = libc::itimerval {
+        it_interval: libc::timeval {
+            tv_sec: 1,
+            tv_usec: 0,
+        },
+        it_value: libc::timeval {
+            tv_sec: 1,
+            tv_usec: 0,
+        },
+    };
+
+    unsafe {
+        libc::setitimer(libc::ITIMER_REAL, &timer, std::ptr::null_mut(),
+    );
+    }
+    //todo!("TODO 3-D: arm periodic SIGALRM via libc::setitimer(ITIMER_REAL, 1s/1s)")
 }
 
 
